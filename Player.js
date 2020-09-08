@@ -1,9 +1,15 @@
 class Player {
-  constructor({ name }) {
+  constructor({ name, socket }) {
     this.score = 0;
     this.wins = 0;
     this.name = name;
     this.hand = [];
+    this.getPublicData = () => ({
+      name: this.name,
+      score: this.score,
+      wins: this.wins,
+    });
+    this.socket = socket;
   }
   addCardToHand(card) {
     this.hand.push(card);

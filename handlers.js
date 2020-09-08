@@ -1,5 +1,5 @@
 const { v4: uuidv4 } = require("uuid");
-const Room = require("./Room");
+const Game = require("./Game");
 
 const connections = {};
 const rooms = {};
@@ -22,7 +22,7 @@ function handleDisconnect(io, socket, data) {
       if (socket.id === game.currentChooserSocketId)
         game.setNextChooserSocketId();
       io.to(roomId).emit("update-players", {
-        players: game.players,
+        players: game.getPublicPlayerData(),
       });
       if (game.getPlayerCount() < 3)
         io.to(roomId).emit("wait-for-more-players");
@@ -36,10 +36,10 @@ function handleJoinRoom(io, socket, data) {
   if (!rooms.hasOwnProperty(roomId)) return socket.emit("room-not-found");
   socket.join(roomId);
 
-  game.addPlayer({ id: socket.id, name });
+  game.addPlayer({ name, socket });
   connections[socket.id].roomId = roomId;
   // We're not using `game` here yet
-  socket.emit("sucessfully-joined-room", { roomId, game });
+  socket.emit("sucessfully-joined-room", { roomId });
 
   if (game.getPlayerCount() > 2) {
     const { name } = game.players[game.currentChooserSocketId];
@@ -48,20 +48,26 @@ function handleJoinRoom(io, socket, data) {
       "enable-start-game-button"
     );
   }
-  io.to(roomId).emit("update-players", { players: game.players });
+  io.to(roomId).emit("update-players", { players: game.getPublicPlayerData() });
 }
 function handleMessage(io, socket, data) {
   const { roomId } = connections[socket.id];
 
   io.to(roomId).emit("update-message", data);
 }
-function handleStartGame(io, socket, data) {
+function handlePlayerSelectedCard(io, socket, data) {
+  console.log(data);
+}
+function handleStartGame(io, socket) {
   const { roomId } = connections[socket.id];
   const game = rooms[roomId];
   game.resetDeck();
   // Deal out cards
-  game.dealNewCards();
-  io.in(roomId).emit("begin-round", { blackCard: game.currentBlackCard });
+  game.startNewRound();
+  io.in(roomId).emit("new-round", { blackCard: game.currentBlackCard });
+  connections[game.currentChooserSocketId].socket.emit(
+    "set-player-as-current-chooser"
+  );
 }
 
 module.exports = {
@@ -70,5 +76,6 @@ module.exports = {
   handleJoinRoom,
   handleCreateRoom,
   handleMessage,
+  handlePlayerSelectedCard,
   handleStartGame,
 };

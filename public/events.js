@@ -1,12 +1,17 @@
 const socket = io.connect("http://localhost:4000");
 
-socket.on("begin-round", handleBeginRound);
+let currentBlackCard,
+  isCurrentChooser = false,
+  selectedCards = [];
+
 socket.on("enable-start-game-button", handleEnableStartGameButton);
 socket.on("room-not-found", () => {
   alert("Room not found");
 });
 socket.on("sucessfully-joined-room", handleSuccessfullyJoinedRoom);
 socket.on("update-hand", handleUpdateHand);
+socket.on("new-round", handleNewRound);
+socket.on("set-player-as-current-chooser", handleSetPlayerAsCurrentChooser);
 socket.on("update-message", handleUpdateMessage);
 socket.on("update-players", handleUpdatePlayers);
 socket.on(
@@ -16,10 +21,6 @@ socket.on(
 socket.on("wait-for-more-players", handleWaitForMorePlayers);
 
 //////////////////////////////////////////////////////////
-function handleBeginRound({ blackCard, hand }) {
-  upateBlackCard(blackCard);
-  updateHand(hand);
-}
 function handleEnableStartGameButton() {
   waitingForMorePlayersText.style.display = "none";
   waitingForPlayerToStartGameText.style.display = "none";
@@ -29,13 +30,49 @@ function handleSuccessfullyJoinedRoom({ roomId }) {
   joinDialog.style.display = "none";
   roomIdText.innerText = roomId;
 }
-function handleUpdateGame(game) {}
+function handleNewRound({ blackCard: blackCardData }) {
+  isCurrentChooser = false;
+  currentBlackCard = blackCardData;
+  selectedCards = [];
+  startGameButton.style.display = "none";
+  waitingForPlayerToStartGameText.style.display = "none";
+  blackCard.innerText = blackCardData.text.replace("_", "________");
+  blackCard.style.display = "flex";
+  chooseCardAmount.innerText = blackCardData.pick;
+  chooseCardText.style.display = "block";
+}
+function handleSetPlayerAsCurrentChooser() {
+  console.log("setting current user");
+  isCurrentChooser = true;
+}
 function handleUpdateHand({ hand }) {
-  hand.innerHtml = "";
+  handContainer.innerHtml = "";
   for (let card of hand) {
-    console.log(card);
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerText = card;
+    div.addEventListener("click", function () {
+      if (isCurrentChooser) return;
+      if (this.className.includes("selected-card")) {
+        this.className = this.className.replace(" selected-card", "");
+        selectedCards = selectedCards.filter(
+          (current) => current.text !== card
+        );
+        return;
+      }
+      if (selectedCards.length >= currentBlackCard.pick) return;
+      selectedCards.push({ element: this, text: card });
+      this.className += " selected-card";
+    });
+    handContainer.appendChild(div);
+  }
+  for (let count = 0; count < hand.length; count++) {
+    const div = document.createElement("div");
+    div.className = "card-spacer";
+    handContainer.appendChild(div);
   }
 }
+
 function handleUpdateMessage({ handle, message }) {
   console.log(`[ Data ]:`);
   const div = document.createElement("div");

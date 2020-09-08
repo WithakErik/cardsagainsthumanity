@@ -24,7 +24,7 @@
           "game players"
           "hand players";
         grid-template-columns: 9fr 1fr;
-        grid-template-rows: 9fr 200px;
+        grid-template-rows: 9fr 250px;
       }
       textarea {
         resize: none;
@@ -86,8 +86,21 @@
         text-align: center;
         background-color: red;
       }
-      #hand {
+      #black-card {
+        display: none;
+        background-color: black;
+        color: white;
+      }
+      #choose-card-text {
+        display: none;
+      }
+      #hand-container {
         grid-area: hand;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        align-items: center;
+        overflow-y: auto;
         height: 100%;
         width: 100%;
         background-color: blue;
@@ -106,6 +119,38 @@
       .player-details * {
         display: flex;
         justify-content: space-between;
+      }
+      .card {
+        display: flex;
+        height: 300px;
+        width: 200px;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        background-color: white;
+        margin: 10px;
+        border: 1px solid black;
+        border-radius: 10px;
+        box-shadow: 2px 2px 3px grey;
+        transition: 200ms;
+        user-select: none; /* standard syntax */
+        -webkit-user-select: none; /* webkit (safari, chrome) browsers */
+        -moz-user-select: none; /* mozilla browsers */
+        -khtml-user-select: none; /* webkit (konqueror) browsers */
+        -ms-user-select: none; /* IE10+ */
+      }
+      .card-spacer {
+        width: 200px;
+        margin: 0 10px;
+        height: 0;
+      }
+      .card:hover {
+        cursor: pointer;
+        transform: translate(-2px, -2px);
+        box-shadow: 4px 4px 6px grey;
+      }
+      .selected-card {
+        background-color: yellow;
       }
     </style>
   </head>
@@ -129,7 +174,10 @@
       <div id="waiting-for-player-to-start-game">
         Waiting for <b id="waiting-for-player-name"></b> to start the game
       </div>
-      <div id="black-card"></div>
+      <div id="choose-card-text">
+        Choose <b id="choose-card-amount"></b> card(s)
+      </div>
+      <div id="black-card" class="card"></div>
       <div id="chosen-cards"></div>
     </div>
 
@@ -141,7 +189,7 @@
       </div>
     </div>
 
-    <div id="hand"></div>
+    <div id="hand-container"></div>
 
     <!-- 
 

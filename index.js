@@ -18,6 +18,7 @@ const {
   handleDisconnect,
   handleJoinRoom,
   handleMessage,
+  handlePlayerSelectedCard,
   handleStartGame,
 } = require("./handlers.js");
 
@@ -28,5 +29,9 @@ io.on("connection", (socket) => {
   socket.on("create-room", (data) => handleCreateRoom(io, socket, data));
   socket.on("join-room", (data) => handleJoinRoom(io, socket, data));
   socket.on("message", (data) => handleMessage(io, socket, data));
+  socket.on("player-selected-card", (data) =>
+    handlePlayerSelectedCard(io, socket, data)
+  );
+
   socket.on("start-game", (data) => handleStartGame(io, socket, data));
 });
