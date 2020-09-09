@@ -9,6 +9,7 @@ const server = app.listen(PORT, () => {
 });
 
 app.use(express.static("public"));
+app.use("/pulic", express.static(__dirname + "/public"));
 
 const io = socket(server);
 
