@@ -61,7 +61,6 @@ function drawPlayerHand(hand) {
     handContainer.appendChild(cardSpacerElement);
   }
 }
-
 function drawPlayerSelectedCards(playerSelectedCards) {
   chosenCards.innerHTML = "";
   for (let key in playerSelectedCards) {
