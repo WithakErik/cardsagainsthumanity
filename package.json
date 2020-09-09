@@ -6,7 +6,7 @@
     "uuid": "^8.3.0"
   },
   "scripts": {
-    "start": "pm2 start app.js --name cards-against-humanity",
+    "start": "pm2 start index.js --name cards-against-humanity",
     "stop": "pm2 stop cards-against-humanity -f"
   },
   "devDependencies": {
