@@ -10,6 +10,10 @@
       integrity="sha384-cg6SkqEOCV1NbJoCu11+bm0NvBRc8IYLRGXkmNrqUBfTjmMYwNKPWBTIKyw9mHNJ"
       crossorigin="anonymous"
     />
+    <script
+      type="module"
+      src="https://unpkg.com/wired-elements/lib/wired-elements-iife.js"
+    ></script>
     <style>
       html,
       body {
@@ -22,12 +26,9 @@
         display: grid;
         grid-template-areas:
           "game players"
-          "hand players";
-        grid-template-columns: 9fr 1fr;
-        grid-template-rows: 9fr 250px;
-      }
-      textarea {
-        resize: none;
+          "hand chat";
+        grid-template-columns: auto 250px;
+        grid-template-rows: auto 250px;
       }
       #join-dialog {
         position: fixed;
@@ -37,6 +38,7 @@
         height: 100%;
         width: 100%;
         background-color: black;
+        z-index: 1;
       }
       #join-dialog-inner {
         text-align: center;
@@ -55,13 +57,15 @@
       #join-room {
         display: flex;
       }
+      #chosen-cards,
+      #choose-card-text,
+      #start-game-button,
+      #start-round-button,
+      #submit-cards-button,
       #waiting-for-player-to-start-game {
         display: none;
       }
-      #start-game-button {
-        display: none;
-      }
-      #players-and-chat {
+      #players {
         grid-area: players;
         display: flex;
         flex-direction: column;
@@ -69,7 +73,8 @@
         height: 100%;
         width: 100%;
         justify-content: space-between;
-        background-color: lime;
+        box-shadow: 0 0 2px black;
+        overflow-y: auto;
       }
       #players-container {
         width: 100%;
@@ -78,21 +83,27 @@
       #game {
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        justify-content: flex-start;
         align-items: center;
         grid-area: game;
         height: 100%;
         width: 100%;
         text-align: center;
-        background-color: red;
+        overflow-y: auto;
       }
       #black-card {
         display: none;
-        background-color: black;
         color: white;
       }
-      #choose-card-text {
-        display: none;
+      .player-selected-card-container,
+      .player-selected-player-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: stretch;
+      }
+      .player-selected-player-container {
+        box-shadow: 0 0 2px inset black;
       }
       #hand-container {
         grid-area: hand;
@@ -103,12 +114,31 @@
         overflow-y: auto;
         height: 100%;
         width: 100%;
-        background-color: blue;
+        background-color: #dddddd;
+        box-shadow: 0 0 2px inset black;
       }
       #chat {
+        grid-area: chat;
         display: flex;
         flex-direction: column;
         width: 100%;
+        align-items: center;
+      }
+      #submit-cards-button {
+        bottom: 0;
+      }
+      #chat-messages-container {
+        overflow-y: auto;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        word-wrap: break-word;
+      }
+      #send-message-button {
+        width: 100%;
+        display: flex;
+        flex-direction: inherit;
       }
       .player-details {
         display: flex;
@@ -122,17 +152,14 @@
       }
       .card {
         display: flex;
-        height: 300px;
-        width: 200px;
+        height: 200px;
+        width: 150px;
         justify-content: center;
         align-items: center;
         text-align: center;
-        background-color: white;
-        margin: 10px;
-        border: 1px solid black;
-        border-radius: 10px;
-        box-shadow: 2px 2px 3px grey;
+        box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.5);
         transition: 200ms;
+        margin: 10px;
         user-select: none; /* standard syntax */
         -webkit-user-select: none; /* webkit (safari, chrome) browsers */
         -moz-user-select: none; /* mozilla browsers */
@@ -140,17 +167,18 @@
         -ms-user-select: none; /* IE10+ */
       }
       .card-spacer {
-        width: 200px;
-        margin: 0 10px;
+        visibility: hidden;
         height: 0;
+        margin: 0 10px;
+        padding: 0 10px;
       }
-      .card:hover {
+      .white-card:hover {
         cursor: pointer;
-        transform: translate(-2px, -2px);
-        box-shadow: 4px 4px 6px grey;
+        transform: translate(-4px, -4px);
+        box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
       }
-      .selected-card {
-        background-color: yellow;
+      wired-textarea {
+        width: CALC(100% - 20px);
       }
     </style>
   </head>
@@ -158,18 +186,28 @@
     <div id="join-dialog">
       <div id="join-dialog-inner">
         <h1>Create or Join Room</h1>
-        <input autofocus id="name" placeholder="Name" type="text" />
+        <wired-input
+          autofocus
+          id="name"
+          placeholder="Name"
+          type="text"
+        ></wired-input>
         <div id="join-room">
-          <input id="room-id-input" placeholder="Room ID" type="text" />
-          <button id="join-room-button">Join!</button>
+          <wired-input
+            id="room-id-input"
+            placeholder="Room ID"
+            type="text"
+          ></wired-input>
+          <wired-button id="join-room-button">Join!</wired-button>
         </div>
-        <button id="create-room-button">Create New!</button>
+        <wired-button id="create-room-button">Create New!</wired-button>
       </div>
     </div>
 
     <div id="game">
       <h1>Room: <span id="room-id-text"></span></h1>
-      <button id="start-game-button">Start Game</button>
+      <wired-button id="start-game-button">Start Game</wired-button>
+      <wired-button id="start-round-button">Start Round</wired-button>
       <div id="waiting-for-more-players">Waiting for more players</div>
       <div id="waiting-for-player-to-start-game">
         Waiting for <b id="waiting-for-player-name"></b> to start the game
@@ -177,34 +215,27 @@
       <div id="choose-card-text">
         Choose <b id="choose-card-amount"></b> card(s)
       </div>
-      <div id="black-card" class="card"></div>
+      <wired-card class="card" fill="black" id="black-card"></wired-card>
       <div id="chosen-cards"></div>
+      <wired-button id="submit-cards-button">Submit Cards</wired-button>
     </div>
 
-    <div id="players-and-chat">
+    <div id="players">
       <div id="players-container"></div>
-      <div id="chat">
-        <textarea placeholder="Message"></textarea>
-        <button id="send-message-button">Send</button>
-      </div>
+    </div>
+
+    <div id="chat">
+      <div id="chat-messages-container"></div>
+      <wired-textarea id="message" placeholder="Message"></wired-textarea>
+      <wired-button id="send-message-button">Send</wired-button>
     </div>
 
     <div id="hand-container"></div>
 
-    <!-- 
-
-      <div class="vertical-stack">
-        <h1>Message</h1>
-        <div id="chat-window">
-          <div id="output"></div>
-        </div>
-        <input id="handle" type="text" placeholder="Handle" />
-        <input id="message" type="text" placeholder="Message" />
-        <button id="send-button">Send</button>
-      </div>
-    </div> -->
+    <script src="/globals.js"></script>
     <script src="/listeners.js"></script>
+    <script src="/utilities.js"></script>
+    <script src="/handlers.js"></script>
     <script src="/events.js"></script>
-    <script src="/index.js"></script>
   </body>
 </html>

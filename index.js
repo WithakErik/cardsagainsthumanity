@@ -18,20 +18,21 @@ const {
   handleDisconnect,
   handleJoinRoom,
   handleMessage,
-  handlePlayerSelectedCard,
+  handleSelectedWinner,
   handleStartGame,
+  handleSubmitCards,
 } = require("./handlers.js");
 
 io.on("connection", (socket) => {
-  console.log(`[ Adding connectino ] - ${socket.id}`);
+  console.log(`[ Adding connection ] - ${socket.id}`);
   connections[socket.id] = { roomId: null, socket };
   socket.on("disconnect", (data) => handleDisconnect(io, socket, data));
   socket.on("create-room", (data) => handleCreateRoom(io, socket, data));
   socket.on("join-room", (data) => handleJoinRoom(io, socket, data));
   socket.on("message", (data) => handleMessage(io, socket, data));
-  socket.on("player-selected-card", (data) =>
-    handlePlayerSelectedCard(io, socket, data)
-  );
-
   socket.on("start-game", (data) => handleStartGame(io, socket, data));
+  socket.on("selected-winner", (data) =>
+    handleSelectedWinner(io, socket, data)
+  );
+  socket.on("submit-cards", (data) => handleSubmitCards(io, socket, data));
 });

@@ -4,18 +4,33 @@ class Player {
     this.wins = 0;
     this.name = name;
     this.hand = [];
-    this.getPublicData = () => ({
+    this.getPublicData = (currentChooserSocketId) => ({
       name: this.name,
       score: this.score,
       wins: this.wins,
+      isCurrentChooser: currentChooserSocketId === this.socket.id,
     });
     this.socket = socket;
   }
   addCardToHand(card) {
     this.hand.push(card);
   }
-  deleteCardFromHand(card) {
-    this.hand = this.hand.filter((c) => c.text !== card.text);
+  addPointToWins() {
+    this.wins++;
+  }
+  addPointToScore() {
+    this.score++;
+  }
+  clearScore() {
+    this.score = 0;
+  }
+  deleteCardsFromHand(cards) {
+    for (let card of cards) {
+      this.hand = this.hand.filter((c) => c !== card);
+    }
+  }
+  resetHand() {
+    this.hand = [];
   }
 }
 

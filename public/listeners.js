@@ -1,4 +1,5 @@
 const blackCard = document.getElementById("black-card"),
+  chatMessagesContainer = document.getElementById("chat-messages-container"),
   chosenCards = document.getElementById("chosen-cards"),
   chooseCardAmount = document.getElementById("choose-card-amount"),
   chooseCardText = document.getElementById("choose-card-text"),
@@ -14,6 +15,7 @@ const blackCard = document.getElementById("black-card"),
   roomIdText = document.getElementById("room-id-text"),
   sendMessageButton = document.getElementById("send-message-button"),
   startGameButton = document.getElementById("start-game-button"),
+  submitCardsButton = document.getElementById("submit-cards-button"),
   waitingForMorePlayersText = document.getElementById(
     "waiting-for-more-players"
   ),
@@ -24,16 +26,33 @@ const blackCard = document.getElementById("black-card"),
 
 createRoomButton.addEventListener("click", () => {
   if (!name.value) return alert("You must enter a name");
+  playerName = name.value;
   socket.emit("create-room", { name: name.value });
 });
 joinRoomButton.addEventListener("click", () => {
   if (!roomIdInput.value) return alert("You must enter a room ID");
   if (!name.value) return alert("You must enter a name");
-  socket.emit("join-room", { roomId: roomIdInput.value, name: name.value });
+  playerName = name.value;
+  socket.emit("join-room", {
+    roomId: roomIdInput.value,
+    name: name.value,
+  });
 });
-sendMessageButton.addEventListener("click", () =>
-  socket.emit("message", { handle: handle.value, message: message.value })
+message.addEventListener(
+  "keyup",
+  (element) => element.keyCode === 13 && sendMessage()
 );
+sendMessageButton.addEventListener("click", () => sendMessage());
 startGameButton.addEventListener("click", () => {
   socket.emit("start-game");
+});
+submitCardsButton.addEventListener("click", () => {
+  if (selectedCards.length < currentBlackCard.pick) return;
+  cardsHaveBeenSubmitted = true;
+  submitCardsButton.style.display = "none";
+  socket.emit("submit-cards", {
+    selectedCards: selectedCards.map((card) => card.text),
+  });
+  cardWasSubmitted = true;
+  selectedCards = [];
 });

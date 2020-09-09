@@ -6,6 +6,7 @@ const rooms = {};
 
 function handleCreateRoom(io, socket, data) {
   const roomId = uuidv4().slice(0, 6);
+  if (data.hasOwnProperty(roomId)) handleCreateRoom(io, socket, data);
   data.roomId = roomId;
   rooms[roomId] = new Game();
   rooms[roomId].setCurrentChooserSocketId(socket.id);
@@ -32,15 +33,18 @@ function handleDisconnect(io, socket, data) {
 }
 function handleJoinRoom(io, socket, data) {
   const { name, roomId } = data;
-  const game = rooms[roomId];
   if (!rooms.hasOwnProperty(roomId)) return socket.emit("room-not-found");
+  const game = rooms[roomId];
+  if (
+    Object.keys(game.players).filter(
+      (socketId) => game.players[socketId].name === name
+    ).length
+  )
+    return socket.emit("duplicate-player-name");
   socket.join(roomId);
-
   game.addPlayer({ name, socket });
   connections[socket.id].roomId = roomId;
-  // We're not using `game` here yet
   socket.emit("sucessfully-joined-room", { roomId });
-
   if (game.getPlayerCount() > 2) {
     const { name } = game.players[game.currentChooserSocketId];
     io.to(roomId).emit("waiting-for-player-to-start-game", { name });
@@ -51,23 +55,65 @@ function handleJoinRoom(io, socket, data) {
   io.to(roomId).emit("update-players", { players: game.getPublicPlayerData() });
 }
 function handleMessage(io, socket, data) {
+  if (data.message === "\n" || data.message === "\r") return;
   const { roomId } = connections[socket.id];
-
   io.to(roomId).emit("update-message", data);
 }
-function handlePlayerSelectedCard(io, socket, data) {
-  console.log(data);
+function handleSelectedWinner(io, socket, { socketId }) {
+  const { roomId } = connections[socket.id];
+  const game = rooms[roomId];
+  game.players[socketId].addPointToScore();
+  if (game.getRemainingCardCount("black") === 0) {
+    game.determineWinners();
+    game.clearPlayerScores();
+    const { name } = game.players[game.currentChooserSocketId];
+    io.to(roomId).emit("waiting-for-player-to-start-game", { name });
+    connections[game.currentChooserSocketId].socket.emit(
+      "enable-start-game-button"
+    );
+  } else {
+    game.startNewRound({ isFirstRound: false });
+    io.in(roomId).emit("new-round", {
+      blackCard: game.currentBlackCard,
+      remainingBlackCards: game.getRemainingCardCount("black"),
+    });
+    connections[game.currentChooserSocketId].socket.emit(
+      "set-player-as-current-chooser"
+    );
+  }
+  io.in(roomId).emit("update-players", { players: game.getPublicPlayerData() });
 }
 function handleStartGame(io, socket) {
   const { roomId } = connections[socket.id];
   const game = rooms[roomId];
   game.resetDeck();
-  // Deal out cards
-  game.startNewRound();
-  io.in(roomId).emit("new-round", { blackCard: game.currentBlackCard });
+  game.startNewRound({ isFirstRound: true });
+  io.in(roomId).emit("new-round", {
+    blackCard: game.currentBlackCard,
+    remainingBlackCards: game.getRemainingCardCount("black"),
+  });
   connections[game.currentChooserSocketId].socket.emit(
     "set-player-as-current-chooser"
   );
+  io.in(roomId).emit("update-players", { players: game.getPublicPlayerData() });
+}
+function handleSubmitCards(io, socket, { selectedCards }) {
+  const { roomId } = connections[socket.id];
+  const game = rooms[roomId];
+  game.players[socket.id].deleteCardsFromHand(selectedCards);
+  game.addCurrentSelectedWhiteCards({
+    socketId: socket.id,
+    cards: selectedCards,
+  });
+  if (game.getCurrentSelectedWhiteCardsCound() >= game.getPlayerCount() - 1) {
+    game.clearPlayerSelectedCardsFromHand();
+    io.to(roomId).emit("update-player-selected-cards", {
+      playerSelectedCards: game.currentSelectedWhiteCards,
+    });
+    io.to(roomId).emit("update-players", {
+      players: game.getPublicPlayerData(),
+    });
+  }
 }
 
 module.exports = {
@@ -76,6 +122,7 @@ module.exports = {
   handleJoinRoom,
   handleCreateRoom,
   handleMessage,
-  handlePlayerSelectedCard,
+  handleSelectedWinner,
   handleStartGame,
+  handleSubmitCards,
 };
