@@ -25,7 +25,6 @@ function drawPlayerDetails(player) {
   playerContainer.appendChild(winsContainer);
   playersContainer.appendChild(playerContainer);
 }
-
 function drawPlayerHand(hand) {
   for (let card of hand) {
     const cardElement = document.createElement("wired-card");
