@@ -8,8 +8,8 @@ const server = app.listen(PORT, () => {
   console.log(`[ Listening on port ] - ${PORT}`);
 });
 
-app.use(express.static("public"));
-app.use("/", express.static(__dirname));
+app.use(express.static(__dirname + "public"));
+// app.use("/", express.static(__dirname));
 
 const io = socket(server);
 
