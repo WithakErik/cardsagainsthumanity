@@ -35,4 +35,5 @@ io.on("connection", (socket) => {
   );
   socket.on("submit-cards", (data) => handleSubmitCards(io, socket, data));
   socket.on("error", (error) => console.error(error));
+  socket.on('test', () => console.log('WE CONNECTED FORM THE CLIENT SIDE'))
 });

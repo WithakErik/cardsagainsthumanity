@@ -1,4 +1,8 @@
 const socket = io.connect("https://goldenk.tech/game");
+socket.on('connect', () => {
+  console.log('we conneted');
+  this.socket.emit('test');
+})
 
 socket.on("duplicate-player-name", () =>
   alert("Someone with that name is already in the room")
