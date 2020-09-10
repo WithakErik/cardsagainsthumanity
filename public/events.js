@@ -1,4 +1,4 @@
-const socket = io.connect("/game");
+const socket = io.connect("45.79.90.253/game");
 
 console.log(socket);
 socket.on("connect", () => {
