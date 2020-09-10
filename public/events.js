@@ -1,4 +1,4 @@
-const socket = io.connect("https://goldenk.tech/game/node_modules");
+const socket = io.connect("goldenk.tech/game/node_modules");
 
 socket.on("duplicate-player-name", () =>
   alert("Someone with that name is already in the room")
