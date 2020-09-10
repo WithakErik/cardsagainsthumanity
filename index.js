@@ -14,7 +14,7 @@ const app = express();
 //   console.log(`[ Listening on port ] - ${PORT}`);
 // });
 
-https
+const server = https
   .createServer(credentials, app)
   .listen(PORT, () => console.log(`[ Listening On Port ] - ${PORT}`));
 const io = socket(server);
