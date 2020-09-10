@@ -1,4 +1,4 @@
-const socket = io.connect("https://goldenk.tech/game");
+const socket = io.connect("ws://goldenk.tech/game");
 
 console.log(socket);
 socket.on("connect", () => {
