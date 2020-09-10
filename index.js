@@ -34,4 +34,5 @@ io.on("connection", (socket) => {
     handleSelectedWinner(io, socket, data)
   );
   socket.on("submit-cards", (data) => handleSubmitCards(io, socket, data));
+  socket.on("error", (error) => console.error(error));
 });
