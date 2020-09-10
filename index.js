@@ -1,5 +1,4 @@
 const express = require("express");
-const path = require("path");
 const socket = require("socket.io");
 
 const PORT = process.env.PORT || 4000;
@@ -9,7 +8,6 @@ const server = app.listen(PORT, () => {
 });
 const io = socket(server);
 app.use(express.static("public"));
-// app.use("/", express.static(path.join(__dirname, "public")));
 
 const {
   connections,
@@ -35,5 +33,5 @@ io.on("connection", (socket) => {
   );
   socket.on("submit-cards", (data) => handleSubmitCards(io, socket, data));
   socket.on("error", (error) => console.error(error));
-  socket.on('test', () => console.log('WE CONNECTED FORM THE CLIENT SIDE'))
+  socket.on("test", () => console.log("WE CONNECTED FORM THE CLIENT SIDE"));
 });
