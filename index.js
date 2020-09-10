@@ -1,11 +1,21 @@
 const express = require("express");
 const socket = require("socket.io");
 
+var https = require("https");
+var privateKey = fs.readFileSync("sslcert/server.key", "utf8");
+var certificate = fs.readFileSync("sslcert/server.crt", "utf8");
+
+var credentials = { key: privateKey, cert: certificate };
+
 const PORT = process.env.PORT || 4000;
 const app = express();
-const server = app.listen(PORT, () => {
-  console.log(`[ Listening on port ] - ${PORT}`);
-});
+// const server = app.listen(PORT, () => {
+//   console.log(`[ Listening on port ] - ${PORT}`);
+// });
+
+https
+  .createServer(credentials, app)
+  .listen(PORT, () => console.log(`[ Listening On Port ] - ${PORT}`));
 const io = socket(server);
 app.use(express.static("public"));
 
