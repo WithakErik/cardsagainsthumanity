@@ -9,7 +9,7 @@
   },
   "scripts": {
     "monit": "pm2 monit",
-    "start": "pm2 start index.js --name cards-against-humanity --watch",
+    "start": "pm2 start index.js --name cards-against-humanity",
     "stop": "pm2 stop cards-against-humanity -f"
   },
   "devDependencies": {
