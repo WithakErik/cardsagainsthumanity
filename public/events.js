@@ -1,8 +1,4 @@
-const socket = io.connect("/game", {
-  secure: true,
-  reconnect: true,
-  rejectUnauthorized: false,
-});
+const socket = io();
 
 console.log(socket);
 socket.on("connect", () => {
