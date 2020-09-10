@@ -1,5 +1,6 @@
 const socket = io.connect("/game");
 
+console.log(socket);
 socket.on("connect", () => {
   console.log("we conneted");
   this.socket.emit("test");
