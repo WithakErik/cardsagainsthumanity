@@ -1,4 +1,4 @@
-const socket = io.connect("45.79.90.253/game", {
+const socket = io.connect("/game", {
   secure: true,
   reconnect: true,
   rejectUnauthorized: false,
