@@ -1,17 +1,14 @@
 const express = require("express");
-const socket = require("socket.io");
 const path = require("path");
+const socket = require("socket.io");
 
 const PORT = process.env.PORT || 4000;
-
 const app = express();
 const server = app.listen(PORT, () => {
   console.log(`[ Listening on port ] - ${PORT}`);
 });
-
-app.use("/", express.static(path.join(__dirname, "public")));
-
 const io = socket(server);
+app.use("/", express.static(path.join(__dirname, "public")));
 
 const {
   connections,
