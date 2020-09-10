@@ -1,9 +1,7 @@
 const socket = io();
 
-console.log(socket);
 socket.on("connect", () => {
   console.log("we conneted");
-  this.socket.emit("test");
 });
 
 socket.on("duplicate-player-name", () =>
