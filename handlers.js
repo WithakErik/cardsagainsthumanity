@@ -105,6 +105,8 @@ function handleSubmitCards(io, socket, { selectedCards }) {
     socketId: socket.id,
     cards: selectedCards,
   });
+  // Move this into Game as a method to check if all players have submitted cards
+  // We'll need to check this again whenever a player leaves the room
   if (game.getCurrentSelectedWhiteCardsCound() >= game.getPlayerCount() - 1) {
     game.clearPlayerSelectedCardsFromHand();
     io.to(roomId).emit("update-player-selected-cards", {
