@@ -1,11 +1,12 @@
 const express = require("express");
 const socket = require("socket.io");
 
-var https = require("https");
-var privateKey = fs.readFileSync("sslcert/server.key", "utf8");
-var certificate = fs.readFileSync("sslcert/server.crt", "utf8");
+const fs = require("fs");
+const https = require("https");
+const privateKey = fs.readFileSync("sslcert/server.key", "utf8");
+const certificate = fs.readFileSync("sslcert/server.crt", "utf8");
 
-var credentials = { key: privateKey, cert: certificate };
+const credentials = { key: privateKey, cert: certificate };
 
 const PORT = process.env.PORT || 4000;
 const app = express();
