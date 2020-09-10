@@ -1,4 +1,4 @@
-const socket = io.connect("http://localhost:4000");
+const socket = io.connect("https://goldenk.tech/game");
 
 socket.on("duplicate-player-name", () =>
   alert("Someone with that name is already in the room")
