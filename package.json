@@ -8,6 +8,7 @@
     "uuid": "^8.3.0"
   },
   "scripts": {
+    "monit": "pm2 monit",
     "start": "pm2 start index.js --name cards-against-humanity --watch",
     "stop": "pm2 stop cards-against-humanity -f"
   },
